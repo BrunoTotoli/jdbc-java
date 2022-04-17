@@ -2,19 +2,22 @@ package application;
 
 import db.DB;
 import db.DbException;
-
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import org.junit.jupiter.api.Test;
+import java.sql.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
 public class Program {
 
-    public static void main(String[] args) {
-        Connection conn = null;
-        Statement statement = null;
-        ResultSet resultSet = null;
+    Connection conn = null;
+    Statement statement = null;
+    ResultSet resultSet = null;
+    PreparedStatement preparedStatement = null;
+    SimpleDateFormat sdf = new SimpleDateFormat("dd/mm/yyyy");
 
+
+    @Test
+    void searchInDataBase() {
         try {
             conn = DB.getConnection();
             statement = conn.createStatement();
@@ -27,6 +30,40 @@ public class Program {
         } finally {
             DB.closeStatement(statement);
             DB.closeResultSet(resultSet);
+            DB.closeConnection();
+        }
+    }
+
+    @Test
+    void insertInDataBase() {
+        try {
+            conn = DB.getConnection();
+            preparedStatement = conn.prepareStatement("INSERT INTO seller " +
+                    "(Name,Email,BirthDate,BaseSalary,DepartmentId) " +
+                    "VALUES (?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+            preparedStatement.setString(1, "Moacir Oliveira");
+            preparedStatement.setString(2, "Moacir@gmail.com");
+            preparedStatement.setDate(3, new Date(sdf.parse("22/04/1948").getTime()));
+            preparedStatement.setDouble(4, 3000.00);
+            preparedStatement.setInt(5, 4);
+
+            int rowsAffected = preparedStatement.executeUpdate();
+
+            if (rowsAffected > 0) {
+                ResultSet rs = preparedStatement.getGeneratedKeys();
+                while (rs.next()) {
+                    int id = rs.getInt(1);
+                    System.out.println("Id: " + id);
+                }
+            } else {
+                System.out.println("No rown affected!");
+            }
+        } catch (SQLException e) {
+            throw new DbException(e.getMessage());
+        } catch (ParseException e) {
+            e.printStackTrace();
+        } finally {
+            DB.closeStatement(preparedStatement);
             DB.closeConnection();
         }
     }
