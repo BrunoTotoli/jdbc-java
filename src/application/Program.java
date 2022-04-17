@@ -68,20 +68,41 @@ public class Program {
             DB.closeConnection();
         }
     }
+
     @Test
     void updateInDataBase() {
         try {
             conn = DB.getConnection();
-            preparedStatement = conn.prepareStatement("UPDATE seller SET BaseSalary + ? WHERE (DepartmentId = ? )");
+            preparedStatement = conn.prepareStatement("UPDATE seller " +
+                    "SET BaseSalary + ? " +
+                    "WHERE (DepartmentId = ? )");
             preparedStatement.setDouble(1, 200);
             preparedStatement.setInt(2, 2);
             int rowsAffected = preparedStatement.executeUpdate();
             System.out.println("Rows Affected: " + rowsAffected);
         } catch (SQLException e) {
             throw new DbException(e.getMessage());
-
-
+        } finally {
+            DB.closeStatement(preparedStatement);
+            DB.closeConnection();
         }
 
+    }
+
+    @Test
+    void deleteInDataBase() {
+        try {
+            conn = DB.getConnection();
+            preparedStatement = conn.prepareStatement("DELETE FROM department WHERE id = ? ");
+            preparedStatement.setInt(1, 2);
+            int rowsAffected = preparedStatement.executeUpdate();
+
+            System.out.println("Rows Affected: " + rowsAffected);
+        } catch (SQLException e) {
+            throw new DbException(e.getMessage());
+        } finally {
+            DB.closeStatement(preparedStatement);
+            DB.closeConnection();
+        }
     }
 }
