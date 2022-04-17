@@ -105,4 +105,29 @@ public class Program {
             DB.closeConnection();
         }
     }
+
+    @Test
+    void commit() {
+        try {
+            conn = DB.getConnection();
+            statement = conn.createStatement();
+            conn.setAutoCommit(false);
+            int rows1 = statement.executeUpdate("UPDATE seller SET BaseSalary = 2090 WHERE DepartmentId = 1 ");
+//            if (true)
+//                throw new SQLException("Fake Exception");
+            int rows2 = statement.executeUpdate("UPDATE seller SET BaseSalary = 2090 WHERE DepartmentId = 2");
+            conn.commit();
+            System.out.println("rows 1: " + rows1);
+            System.out.println("rows 2: " + rows2);
+
+
+        } catch (SQLException e) {
+            try {
+                conn.rollback();
+                throw new DbException("Transaction rolled back! caused by: " + e.getMessage());
+            } catch (SQLException ex) {
+                throw new DbException("Error trying to rollback! caused by: " + ex.getMessage());
+            }
+        }
+    }
 }
