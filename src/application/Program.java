@@ -3,6 +3,7 @@ package application;
 import db.DB;
 import db.DbException;
 import org.junit.jupiter.api.Test;
+
 import java.sql.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -66,5 +67,21 @@ public class Program {
             DB.closeStatement(preparedStatement);
             DB.closeConnection();
         }
+    }
+    @Test
+    void updateInDataBase() {
+        try {
+            conn = DB.getConnection();
+            preparedStatement = conn.prepareStatement("UPDATE seller SET BaseSalary + ? WHERE (DepartmentId = ? )");
+            preparedStatement.setDouble(1, 200);
+            preparedStatement.setInt(2, 2);
+            int rowsAffected = preparedStatement.executeUpdate();
+            System.out.println("Rows Affected: " + rowsAffected);
+        } catch (SQLException e) {
+            throw new DbException(e.getMessage());
+
+
+        }
+
     }
 }
